@@ -11,6 +11,8 @@
 #             echo "This is a step within a job within a workflow"
 #             ls -lart
 
+
+
 name: GitHub Custom Actions
 on: workflow_dispatch
 
@@ -18,10 +20,10 @@ jobs:
   checkout git repo:
     runs-on ubuntu-latest
 
-  steps:
-    - name: Checkout Repo
-    uses: actions/checkout@v4
-    - name: Investigate Repo
-    run: |
-      pwd
-      ls -lart
+    steps:
+      - name: Checkout Repo
+      uses: actions/checkout@v4
+      - name: Investigate Repo
+      run: |
+        pwd
+        ls -lart
