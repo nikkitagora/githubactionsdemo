@@ -21,9 +21,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Install Tree
+        run: sudo apt install tree -y
       - name: Checkout Repo
         uses: actions/checkout@v4
       - name: Investigate Repo
         run: |
           pwd
-          ls -lart
+          tree -a
