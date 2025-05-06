@@ -1,12 +1,27 @@
-name: GitHub Actions on Push
-on: push
+# name: GitHub Actions on Push
+# on: push
+
+# jobs:
+#     on-push-job:
+#       runs-on: ubuntu-latest
+
+#       steps:
+#         - name: First Step
+#           run: |
+#             echo "This is a step within a job within a workflow"
+#             ls -lart
+
+name: GitHub Custom Actions
+on: workflow_dispatch
 
 jobs:
-    on-push-job:
-      runs-on: ubuntu-latest
+  checkout git repo:
+    runs-on ubuntu-latest
 
-      steps:
-        - name: First Step
-          run: |
-            echo "This is a step within a job within a workflow"
-            ls -lart
+    steps:
+      - name: Checkout Repo
+      uses: actions/checkout@v4
+      - name: Investigate Repo
+      run: |
+        pwd
+        ls -lart
