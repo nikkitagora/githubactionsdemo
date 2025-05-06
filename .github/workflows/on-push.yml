@@ -18,7 +18,7 @@ on: workflow_dispatch
 
 jobs:
   checkout-git-repo:
-    runs-on ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repo
