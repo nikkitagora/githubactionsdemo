@@ -1,0 +1,12 @@
+name: GitHub Actions on Push
+on: workflow_dispatch
+
+jobs:
+    clone-website-and-run-problem:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Git Clone Repo
+          run: git clone https://github.com/nikkitagora/website
+        - name: Check Website Files
+          run: ls -lart
