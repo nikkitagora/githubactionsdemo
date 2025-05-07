@@ -24,10 +24,17 @@ jobs:
         # run: curl localhost:80
         run: python3 -c "import requests; r=requests.get('http://localhost:80'); print(r.status_code)"
 
+  another-demo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Echo Sentence
+        run: echo "Hello Everybody"
+
   testing-api-availability:
     needs: [clone-website-and-test-service]
     runs-on: ubuntu-latest
 
     steps:
       - name: Ping the Service
-        run: ping 8.8.8.8 -n 30
+        run: ping 8.8.8.8 -n 5
