@@ -21,5 +21,5 @@ jobs:
         - name: Check Nginx Service
           run: sudo systemctl status nginx
         - name: Test Web Service
-          run: curl localhot:8080
+          run: curl localhost:8080
           # run: python3 -c "import requests; r=requests.get('http://localhost:8080'); print(r.status_code)"
