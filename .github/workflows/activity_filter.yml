@@ -2,7 +2,11 @@ name: Activity Filters
 on:
   workflow_dispatch:
   pull_request:
-    types: [synchronize]
+    types: [opened, synchronize]
+  push:
+    branches:
+      - 'development*'
+      - main
 
 jobs:
   any-old-job:
