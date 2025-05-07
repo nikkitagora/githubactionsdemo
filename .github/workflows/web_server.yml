@@ -10,3 +10,9 @@ jobs:
           run: git clone https://github.com/nikkitagora/website
         - name: Check Website Files
           run: ls -lart
+        - name: Move Website Files
+          run: sudo mv ./website/1dwebsite/* /usr/share/nginx/html
+        - name: Star Nginx Service
+          run: sudo systemctl start nginx
+        - name: Test Web Service
+          run: python3 -c "import requests; r=requests.get('http://localhost:8080'); print(r.status_code)"
