@@ -1,0 +1,17 @@
+name: Artifact Downloads
+on: push
+
+jobs:
+    any-job-again-demo:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Make the File
+          run: |
+            touch my_file_to_download
+            echo "Some stuff" > my_file_to_download
+            echo "More stuff" > my_file_to_download
+        - name: Download File to Artifacts
+          run: |
+            pwd
+            ls -l
