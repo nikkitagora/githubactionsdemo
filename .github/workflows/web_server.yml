@@ -14,9 +14,12 @@ jobs:
           run: sudo mv ./website/1dwebsite/* /usr/share/nginx/html
         - name: Check Website Files
           run: ls -lart /usr/share/nginx/html
-        - name: Star Nginx Service
-          run: sudo systemctl start nginx
+        - name: Start and Enable Nginx Service
+          run: 
+            sudo systemctl enable nginx
+            sudo systemctl start nginx
         - name: Check Nginx Service
           run: sudo systemctl status nginx
         - name: Test Web Service
-          run: python3 -c "import requests; r=requests.get('http://localhost:8080'); print(r.status_code)"
+          run: curl localhot:8080
+          # run: python3 -c "import requests; r=requests.get('http://localhost:8080'); print(r.status_code)"
