@@ -2,7 +2,7 @@ name: GitHub Actions on Push
 on: workflow_dispatch
 
 jobs:
-  clone-website-and-run-problem:
+  clone-website-and-test-service:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,5 +28,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      needs: [clone-website-and-test-service]
       - name: Ping the Service
-        run: ping 8.8.8.8
+        run: ping 8.8.8.8 -n 30
