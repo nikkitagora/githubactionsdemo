@@ -12,6 +12,7 @@ jobs:
             echo "Some stuff" > my_file_to_download
             echo "More stuff" > my_file_to_download
         - name: Download File to Artifacts
-          run: |
-            pwd
-            ls -l
+          uses: actions/upload-artifact@v4
+          with:
+            name: my_file_to_download
+            path: /home/runner/work/githubactionsdemo/githubactionsdemo/my_file_to_download
