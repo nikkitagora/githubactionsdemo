@@ -25,9 +25,9 @@ jobs:
         run: python3 -c "import requests; r=requests.get('http://localhost:80'); print(r.status_code)"
 
   testing-api-availability:
+    needs: [clone-website-and-test-service]
     runs-on: ubuntu-latest
 
     steps:
-      needs: [clone-website-and-test-service]
       - name: Ping the Service
         run: ping 8.8.8.8 -n 30
