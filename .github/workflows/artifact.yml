@@ -14,4 +14,4 @@ jobs:
         - name: Download File to Artifacts
           run: |
             pwd
-            ls -l
+            ls -la
