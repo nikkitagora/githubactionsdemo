@@ -2,24 +2,31 @@ name: GitHub Actions on Push
 on: workflow_dispatch
 
 jobs:
-    clone-website-and-run-problem:
-      runs-on: ubuntu-latest
+  clone-website-and-run-problem:
+    runs-on: ubuntu-latest
 
-      steps:
-        - name: Git Clone Repo
-          run: git clone https://github.com/nikkitagora/website
-        - name: Check Website Files
-          run: ls -lart
-        - name: Move Website Files
-          run: sudo mv ./website/1dwebsite/* /usr/share/nginx/html/
-        - name: Check Website Files
-          run: ls -lart /usr/share/nginx/html/
-        - name: Start and Enable Nginx Service
-          run: |
-            sudo systemctl enable nginx
-            sudo systemctl start nginx
-        - name: Check Nginx Service
-          run: sudo systemctl status nginx
-        - name: Test Web Service
-          # run: curl localhost:80
-          run: python3 -c "import requests; r=requests.get('http://localhost:80'); print(r.status_code)"
+    steps:
+      - name: Git Clone Repo
+        run: git clone https://github.com/nikkitagora/website
+      - name: Check Website Files
+        run: ls -lart
+      - name: Move Website Files
+        run: sudo mv ./website/1dwebsite/* /usr/share/nginx/html/
+      - name: Check Website Files
+        run: ls -lart /usr/share/nginx/html/
+      - name: Start and Enable Nginx Service
+        run: |
+          sudo systemctl enable nginx
+          sudo systemctl start nginx
+      - name: Check Nginx Service
+        run: sudo systemctl status nginx
+      - name: Test Web Service
+        # run: curl localhost:80
+        run: python3 -c "import requests; r=requests.get('http://localhost:80'); print(r.status_code)"
+
+  testing-api-availability:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping the Service
+        run: ping 8.8.8.8
