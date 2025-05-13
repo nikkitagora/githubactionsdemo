@@ -23,11 +23,13 @@ jobs:
         with:
           terraform_version: 1.5.7
 
-      - name: Configure AWS credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::160733461217:role/github-actions-role
-          aws-region: eu-west-2
+      - name: Install and Update
+        run: |
+          sudo apt update -y
+          sudo apt install -y git
+
+      - name: Git Clone Repo
+        run: git clone https://github.com/Hibrar/cacs-checklist-project
 
       - name: Terraform Init
         run: terraform init
