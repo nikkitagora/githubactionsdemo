@@ -1,0 +1,62 @@
+name: Project CLone
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  project_clone:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::160733461217:role/github-actions-role
+          aws-region: eu-west-2
+
+      - name: Install and Update
+        run: |
+          sudo apt update -y
+          sudo apt install -y nginx
+          sudo apt install -y git
+
+      - name: Git Clone Repo
+        run: git clone https://github.com/nldblanch/cacs-checklist-playground/tree/main
+
+      - name: Check Website Files
+        run: ls -lart
+
+      - name: Move Website Files
+        run: sudo mv ./foldername/* /usr/share/nginx/html/
+
+      - name: Check Website Files
+        run: ls -lart /usr/share/nginx/html/
+
+      - name: Start and Enable Nginx Service
+        run: |
+          sudo systemctl enable nginx
+          sudo systemctl start nginx
+
+      - name: Check Nginx Service
+        run: sudo systemctl status nginx
+
+      - name: Test Web Service
+        run: python3 -c "import requests; r=requests.get('http://localhost:80'); print(r.status_code)"
+
+      - name: Install Tree
+        run: sudo apt install tree -y
+
+      - name: Investigation Repo
+        run: |
+          pwd
+          tree -a

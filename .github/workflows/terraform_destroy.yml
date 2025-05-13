@@ -1,0 +1,116 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      cleanup_first:
+        description: 'Clean up resources using AWS CLI first'
+        required: true
+        type: boolean
+        default: true
+ 
+permissions:
+  id-token: write
+  contents: read
+ 
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+ 
+    defaults:
+      run:
+        shell: bash
+ 
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+ 
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::160733461217:role/github-actions-role
+        aws-region: eu-west-2
+ 
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+ 
+    - name: Terraform Init
+      run: terraform init
+ 
+    - name: Clean up AWS resources
+      if: inputs.cleanup_first
+      run: |
+        # Delete Load Balancers and their listeners
+        for lb in $(aws elbv2 describe-load-balancers --region eu-west-2 --query 'LoadBalancers[*].LoadBalancerArn' --output text); do
+          echo "Finding listeners for Load Balancer: $lb"
+          for listener in $(aws elbv2 describe-listeners --load-balancer-arn $lb --region eu-west-2 --query 'Listeners[*].ListenerArn' --output text); do
+            echo "Deleting listener: $listener"
+            aws elbv2 delete-listener --listener-arn $listener --region eu-west-2
+          done
+          echo "Deleting Load Balancer: $lb"
+          aws elbv2 delete-load-balancer --load-balancer-arn $lb --region eu-west-2
+        done
+ 
+        # Delete Target Groups
+        for tg in $(aws elbv2 describe-target-groups --region eu-west-2 --query 'TargetGroups[*].TargetGroupArn' --output text); do
+          echo "Deleting Target Group: $tg"
+          aws elbv2 delete-target-group --target-group-arn $tg --region eu-west-2
+        done
+ 
+        # Terminate EC2 instances first
+        for instance in $(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --region eu-west-2 --query 'Reservations[*].Instances[*].InstanceId' --output text); do
+          echo "Terminating Instance: $instance"
+          aws ec2 terminate-instances --instance-ids $instance --region eu-west-2
+        done
+ 
+        # Wait longer for instances to terminate
+        echo "Waiting for instances to terminate..."
+        sleep 60
+ 
+        # First disassociate then release Elastic IPs
+        for assoc in $(aws ec2 describe-addresses --region eu-west-2 --query 'Addresses[?AssociationId!=null].AssociationId' --output text); do
+          echo "Disassociating Elastic IP association: $assoc"
+          aws ec2 disassociate-address --association-id $assoc --region eu-west-2
+        done
+ 
+        for eip in $(aws ec2 describe-addresses --region eu-west-2 --query 'Addresses[*].AllocationId' --output text); do
+          echo "Releasing Elastic IP: $eip"
+          aws ec2 release-address --allocation-id $eip --region eu-west-2
+        done
+ 
+        # Delete VPCs (except default)
+        for vpc in $(aws ec2 describe-vpcs --region eu-west-2 --query 'Vpcs[?IsDefault==`false`].VpcId' --output text); do
+          echo "Deleting VPC: $vpc"
+          # Delete Internet Gateways
+          for igw in $(aws ec2 describe-internet-gateways --region eu-west-2 --filters "Name=attachment.vpc-id,Values=$vpc" --query 'InternetGateways[*].InternetGatewayId' --output text); do
+            echo "Detaching and deleting Internet Gateway: $igw"
+            aws ec2 detach-internet-gateway --internet-gateway-id $igw --vpc-id $vpc --region eu-west-2
+            aws ec2 delete-internet-gateway --internet-gateway-id $igw --region eu-west-2
+          done
+ 
+          # Delete Subnets
+          for subnet in $(aws ec2 describe-subnets --region eu-west-2 --filters "Name=vpc-id,Values=$vpc" --query 'Subnets[*].SubnetId' --output text); do
+            echo "Deleting Subnet: $subnet"
+            aws ec2 delete-subnet --subnet-id $subnet --region eu-west-2
+          done
+ 
+          # Delete Route Tables
+          for rt in $(aws ec2 describe-route-tables --region eu-west-2 --filters "Name=vpc-id,Values=$vpc" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text); do
+            echo "Deleting Route Table: $rt"
+            aws ec2 delete-route-table --route-table-id $rt --region eu-west-2
+          done
+ 
+          # Delete Security Groups
+          for sg in $(aws ec2 describe-security-groups --region eu-west-2 --filters "Name=vpc-id,Values=$vpc" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
+            echo "Deleting Security Group: $sg"
+            aws ec2 delete-security-group --group-id $sg --region eu-west-2
+          done
+ 
+          # Finally delete the VPC
+          echo "Deleting VPC: $vpc"
+          aws ec2 delete-vpc --vpc-id $vpc --region eu-west-2
+        done
+ 
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
