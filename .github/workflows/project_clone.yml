@@ -1,4 +1,4 @@
-name: Project CLone
+name: Project Clone
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
         run: ls -lart
 
       - name: Move Website Files
-        run: sudo mv ./foldername/* /usr/share/nginx/html/
+        run: sudo mv ./cacs-checklist-playground/* /usr/share/nginx/html/
 
       - name: Check Website Files
         run: ls -lart /usr/share/nginx/html/
